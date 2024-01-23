@@ -6,7 +6,6 @@ class CalculatorApp:
     def __init__(self, master):
         self.master = master
         self.master.title("SOMBFAN")
-        self.master.geometry("800x600")
 
         # Create a Notebook (tabs)
         self.notebook = ttk.Notebook(master)
@@ -19,17 +18,17 @@ class CalculatorApp:
 
         # Random Number Generator Tab
         rng_tab = ttk.Frame(self.notebook)
-        self.notebook.add(rng_tab, text="Random Number Generator")
+        self.notebook.add(rng_tab, text="Random Number")
         self.create_rng_tab(rng_tab)
 
         # Multiples of 2 Tab
         multiples_of_two_tab = ttk.Frame(self.notebook)
-        self.notebook.add(multiples_of_two_tab, text="Multiples of 2")
+        self.notebook.add(multiples_of_two_tab, text="Texture Size")
         self.create_multiples_of_two_tab(multiples_of_two_tab)
 
         # Nearest Prime Number Tab
         nearest_prime_tab = ttk.Frame(self.notebook)
-        self.notebook.add(nearest_prime_tab, text="Nearest Prime Number")
+        self.notebook.add(nearest_prime_tab, text="Prime Numbers")
         self.create_nearest_prime_tab(nearest_prime_tab)
 
     def create_calculator(self, tab):
@@ -97,48 +96,84 @@ class CalculatorApp:
 
     def create_multiples_of_two_tab(self, tab):
         # Entry for the number
-        num_var = tk.IntVar()
+        num_var = tk.IntVar(value=2)  # Set default value to 2
         num_entry = tk.Entry(tab, textvariable=num_var, width=10)
-        num_label = tk.Label(tab, text="Number:")
+        num_label = tk.Label(tab, text="Input:")
         num_label.grid(row=0, column=0)
         num_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        # Button to calculate next power of two
-        calculate_button = tk.Button(tab, text="Calculate", command=lambda: self.calculate_next_power_of_two(num_var.get()))
-        calculate_button.grid(row=1, column=0, columnspan=2, pady=10)
-
         # Display area for result
         self.next_power_of_two_var = tk.StringVar()
-        result_label = tk.Label(tab, text="Next Power of Two:")
+        result_label = tk.Label(tab, text="Result:")
         result_label.grid(row=2, column=0)
         result_entry = tk.Entry(tab, textvariable=self.next_power_of_two_var, state='readonly')
         result_entry.grid(row=2, column=1, pady=5)
+
+        # Call calculate_nearest_power_of_two initially
+        self.calculate_nearest_power_of_two(num_var.get())
+
+        # Buttons to divide and multiply by 2
+        divide_button = tk.Button(tab, text="Divide by 2", command=lambda: self.divide_by_two())
+        multiply_button = tk.Button(tab, text="Multiply by 2", command=lambda: self.multiply_by_two())
+
+        divide_button.grid(row=3, column=0, pady=5)
+        multiply_button.grid(row=3, column=1, pady=5)
+
+        # Button to calculate nearest power of two
+        calculate_button = tk.Button(tab, text="Calculate", command=lambda: self.calculate_nearest_power_of_two(num_var.get()))
+        calculate_button.grid(row=1, column=0, columnspan=2, pady=10)
+
+    def divide_by_two(self):
+        current_result = self.next_power_of_two_var.get()
+        try:
+            divided_result = int(current_result) // 2
+            self.next_power_of_two_var.set(divided_result)
+        except ValueError:
+            pass  # Handle the case where the result is not an integer
+
+    def multiply_by_two(self):
+        current_result = self.next_power_of_two_var.get()
+        try:
+            multiplied_result = int(current_result) * 2
+            self.next_power_of_two_var.set(multiplied_result)
+        except ValueError:
+            pass  # Handle the case where the result is not an integer
+
+    def calculate_nearest_power_of_two(self, number):
+        lower_power = 2 ** (number.bit_length() - 1)
+        higher_power = 2 ** (number.bit_length())
+
+        distance_lower = abs(number - lower_power)
+        distance_higher = abs(number - higher_power)
+
+        result = lower_power if distance_lower <= distance_higher else higher_power
+        self.next_power_of_two_var.set(result)
 
     def create_nearest_prime_tab(self, tab):
         # Entry for the number
         num_var = tk.IntVar()
         num_entry = tk.Entry(tab, textvariable=num_var, width=10)
-        num_label = tk.Label(tab, text="Number:")
+        num_label = tk.Label(tab, text="Input:")
         num_label.grid(row=0, column=0)
         num_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        # Button to calculate nearest prime number
+        # Button to calculate number
         calculate_button = tk.Button(tab, text="Calculate", command=lambda: self.calculate_nearest_prime(num_var.get()))
         calculate_button.grid(row=1, column=0, pady=10)
 
         # Display area for result
         self.nearest_prime_var = tk.StringVar()
-        result_label = tk.Label(tab, text="Nearest Prime Number:")
+        result_label = tk.Label(tab, text="Result:")
         result_label.grid(row=2, column=0)
         result_entry = tk.Entry(tab, textvariable=self.nearest_prime_var, state='readonly')
         result_entry.grid(row=2, column=1, pady=5)
 
         # Buttons for next and previous prime numbers
-        next_prime_button = tk.Button(tab, text="Next Prime", command=lambda: self.calculate_next_prime(num_var.get()))
         prev_prime_button = tk.Button(tab, text="Previous Prime", command=lambda: self.calculate_previous_prime(num_var.get()))
+        next_prime_button = tk.Button(tab, text="Next Prime", command=lambda: self.calculate_next_prime(num_var.get()))
 
-        next_prime_button.grid(row=3, column=0, pady=5)
-        prev_prime_button.grid(row=3, column=1, pady=5)
+        prev_prime_button.grid(row=3, column=0, pady=5)
+        next_prime_button.grid(row=3, column=1, pady=5)
 
     def on_button_click(self, button):
         current_entry_text = self.entry_var.get()
@@ -166,8 +201,14 @@ class CalculatorApp:
 
         self.result_var.set(result)
 
-    def calculate_next_power_of_two(self, number):
-        result = 2 ** (number.bit_length())
+    def calculate_nearest_power_of_two(self, number):
+        lower_power = 2 ** (number.bit_length() - 1)
+        higher_power = 2 ** (number.bit_length())
+
+        distance_lower = abs(number - lower_power)
+        distance_higher = abs(number - higher_power)
+
+        result = lower_power if distance_lower <= distance_higher else higher_power
         self.next_power_of_two_var.set(result)
 
     def calculate_nearest_prime(self, number):
@@ -196,10 +237,23 @@ class CalculatorApp:
         self.nearest_prime_var.set(next_prime)
 
     def calculate_previous_prime(self, number):
-        prev_prime = number - 1
-        while not self.is_prime(prev_prime):
-            prev_prime -= 1
-        self.nearest_prime_var.set(prev_prime)
+        try:
+            if number == "":
+                return  # Return if the input field is empty
+
+            num = int(number)
+            if num < 2:
+                return  # Return if the input number is less than 2
+
+            prev_prime = num - 1
+            while not self.is_prime(prev_prime):
+                prev_prime -= 1
+            self.nearest_prime_var.set(prev_prime)
+        except ValueError:
+            # Handle the case where the input is not a valid integer
+            pass
+
+
 
     def is_prime(self, n):
         if n < 2:
