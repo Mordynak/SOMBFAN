@@ -26,4 +26,5 @@ SOMBFAN is a simple tkinter-based desktop application featuring three tabs - Ran
 To run the application, ensure you have Python and Tkinter installed. Then, execute the following commands:
 
 ```bash
-python your_file_name.py
+cd to directory
+python main.py
