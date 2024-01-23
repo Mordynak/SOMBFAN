@@ -64,7 +64,7 @@ class CalculatorApp:
 
         # Entry for max value
         max_var = tk.DoubleVar()
-        max_var.set(187)  # Default max value
+        max_var.set(8192)  # Default max value
         max_entry = tk.Entry(tab, textvariable=max_var, width=10)
         max_label = tk.Label(tab, text="Max:")
         max_label.grid(row=0, column=2)
@@ -96,11 +96,22 @@ class CalculatorApp:
 
     def create_multiples_of_two_tab(self, tab):
         # Entry for the number
-        num_var = tk.IntVar(value=2)  # Set default value to 2
+        num_var = tk.IntVar(value=256)
         num_entry = tk.Entry(tab, textvariable=num_var, width=10)
         num_label = tk.Label(tab, text="Input:")
         num_label.grid(row=0, column=0)
         num_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        # Button to calculate nearest power of two
+        calculate_button = tk.Button(tab, text="Calculate", command=lambda: self.calculate_nearest_power_of_two(num_var.get()))
+        calculate_button.grid(row=1, column=0, columnspan=2, pady=10)
+
+        # Buttons to divide and multiply by 2
+        divide_button = tk.Button(tab, text="Divide by 2", command=lambda: self.divide_by_two())
+        multiply_button = tk.Button(tab, text="Multiply by 2", command=lambda: self.multiply_by_two())
+
+        divide_button.grid(row=3, column=0, pady=5)
+        multiply_button.grid(row=3, column=1, pady=5)
 
         # Display area for result
         self.next_power_of_two_var = tk.StringVar()
@@ -110,18 +121,7 @@ class CalculatorApp:
         result_entry.grid(row=2, column=1, pady=5)
 
         # Call calculate_nearest_power_of_two initially
-        self.calculate_nearest_power_of_two(num_var.get())
-
-        # Buttons to divide and multiply by 2
-        divide_button = tk.Button(tab, text="Divide by 2", command=lambda: self.divide_by_two())
-        multiply_button = tk.Button(tab, text="Multiply by 2", command=lambda: self.multiply_by_two())
-
-        divide_button.grid(row=3, column=0, pady=5)
-        multiply_button.grid(row=3, column=1, pady=5)
-
-        # Button to calculate nearest power of two
-        calculate_button = tk.Button(tab, text="Calculate", command=lambda: self.calculate_nearest_power_of_two(num_var.get()))
-        calculate_button.grid(row=1, column=0, columnspan=2, pady=10)
+        self.calculate_nearest_power_of_two(2)  # Default value set to 2
 
     def divide_by_two(self):
         current_result = self.next_power_of_two_var.get()
@@ -151,7 +151,7 @@ class CalculatorApp:
 
     def create_nearest_prime_tab(self, tab):
         # Entry for the number
-        num_var = tk.IntVar()
+        num_var = tk.IntVar(value=256)
         num_entry = tk.Entry(tab, textvariable=num_var, width=10)
         num_label = tk.Label(tab, text="Input:")
         num_label.grid(row=0, column=0)
@@ -161,19 +161,20 @@ class CalculatorApp:
         calculate_button = tk.Button(tab, text="Calculate", command=lambda: self.calculate_nearest_prime(num_var.get()))
         calculate_button.grid(row=1, column=0, pady=10)
 
-        # Display area for result
+        # Display area for nearest prime
+        nearest_prime_label = tk.Label(tab, text="Nearest Prime:")
+        nearest_prime_label.grid(row=2, column=0)
         self.nearest_prime_var = tk.StringVar()
-        result_label = tk.Label(tab, text="Result:")
-        result_label.grid(row=2, column=0)
-        result_entry = tk.Entry(tab, textvariable=self.nearest_prime_var, state='readonly')
-        result_entry.grid(row=2, column=1, pady=5)
+        nearest_prime_result = tk.Entry(tab, textvariable=self.nearest_prime_var, state='readonly')
+        nearest_prime_result.grid(row=2, column=1, pady=5)
 
-        # Buttons for next and previous prime numbers
-        prev_prime_button = tk.Button(tab, text="Previous Prime", command=lambda: self.calculate_previous_prime(num_var.get()))
-        next_prime_button = tk.Button(tab, text="Next Prime", command=lambda: self.calculate_next_prime(num_var.get()))
+        # Display area for prime neighbors
+        neighbors_label = tk.Label(tab, text="Prime Neighbors:")
+        neighbors_label.grid(row=3, column=0)
+        self.neighbors_result = tk.Text(tab, height=8, width=20, wrap="none", state='disabled', takefocus=0)
+        self.neighbors_result.grid(row=3, column=1, pady=5)
 
-        prev_prime_button.grid(row=3, column=0, pady=5)
-        next_prime_button.grid(row=3, column=1, pady=5)
+
 
     def on_button_click(self, button):
         current_entry_text = self.entry_var.get()
@@ -211,49 +212,15 @@ class CalculatorApp:
         result = lower_power if distance_lower <= distance_higher else higher_power
         self.next_power_of_two_var.set(result)
 
-    def calculate_nearest_prime(self, number):
-        def is_prime(n):
-            if n < 2:
-                return False
-            for i in range(2, int(n**0.5) + 1):
-                if n % i == 0:
-                    return False
-            return True
-
+    def find_nearest_prime(self, number):
         lower_prime = number - 1
         upper_prime = number + 1
 
-        while not (is_prime(lower_prime) or is_prime(upper_prime)):
+        while not (self.is_prime(lower_prime) or self.is_prime(upper_prime)):
             lower_prime -= 1
             upper_prime += 1
 
-        result = lower_prime if is_prime(lower_prime) else upper_prime
-        self.nearest_prime_var.set(result)
-
-    def calculate_next_prime(self, number):
-        next_prime = number + 1
-        while not self.is_prime(next_prime):
-            next_prime += 1
-        self.nearest_prime_var.set(next_prime)
-
-    def calculate_previous_prime(self, number):
-        try:
-            if number == "":
-                return  # Return if the input field is empty
-
-            num = int(number)
-            if num < 2:
-                return  # Return if the input number is less than 2
-
-            prev_prime = num - 1
-            while not self.is_prime(prev_prime):
-                prev_prime -= 1
-            self.nearest_prime_var.set(prev_prime)
-        except ValueError:
-            # Handle the case where the input is not a valid integer
-            pass
-
-
+        return lower_prime if self.is_prime(lower_prime) else upper_prime
 
     def is_prime(self, n):
         if n < 2:
@@ -262,6 +229,42 @@ class CalculatorApp:
             if n % i == 0:
                 return False
         return True
+
+    def calculate_nearest_prime(self, number):
+        try:
+            if number == "":
+                return  # Return if the input field is empty
+
+            num = int(number)
+            if num < 2:
+                return  # Return if the input number is less than 2
+
+            def generate_prime_list(center, count, direction):
+                primes = []
+                current = center
+                while len(primes) < count:
+                    current += direction
+                    if self.is_prime(current):
+                        primes.append(current)
+                return primes
+
+            nearest_prime = self.find_nearest_prime(num)
+            lower_primes = generate_prime_list(nearest_prime, 4, -1)
+            higher_primes = generate_prime_list(nearest_prime, 4, 1)
+
+            # Update the nearest_prime_var with the nearest prime
+            self.nearest_prime_var.set(nearest_prime)
+
+            # Update the neighbors_result widget with the prime neighbors
+            self.neighbors_result.config(state='normal')
+            self.neighbors_result.delete(1.0, tk.END)
+            for prime in lower_primes + higher_primes:
+                self.neighbors_result.insert(tk.END, f"{prime}\n")
+            self.neighbors_result.config(state='disabled')
+
+        except ValueError:
+            # Handle the case where the input is not a valid integer
+            pass
 
 def main():
     root = tk.Tk()
