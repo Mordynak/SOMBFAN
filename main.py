@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import random
 
-class CalculatorApp:
+class SOMBFAN:
     def __init__(self, master):
         self.master = master
         self.master.title("SOMBFAN")
@@ -10,11 +10,6 @@ class CalculatorApp:
         # Create a Notebook (tabs)
         self.notebook = ttk.Notebook(master)
         self.notebook.grid(row=0, column=0, columnspan=4, padx=10, pady=10, ipady=10)
-
-        # Calculator Tab
-        calculator_tab = ttk.Frame(self.notebook)
-        self.notebook.add(calculator_tab, text="Calculator")
-        self.create_calculator(calculator_tab)
 
         # Random Number Generator Tab
         rng_tab = ttk.Frame(self.notebook)
@@ -31,28 +26,8 @@ class CalculatorApp:
         self.notebook.add(nearest_prime_tab, text="Prime Numbers")
         self.create_nearest_prime_tab(nearest_prime_tab)
 
-    def create_calculator(self, tab):
-        self.entry_var = tk.StringVar()
-        entry = tk.Entry(tab, textvariable=self.entry_var, justify="right", font=('Arial', 14))
-        entry.grid(row=0, column=0, columnspan=4, padx=10, pady=10, ipady=10)
-
-        # Buttons
-        buttons = [
-            '7', '8', '9', '/',
-            '4', '5', '6', '*',
-            '1', '2', '3', '-',
-            '0', 'C', '=', '+'
-        ]
-
-        row_val = 1
-        col_val = 0
-
-        for button in buttons:
-            tk.Button(tab, text=button, width=5, height=2, command=lambda b=button: self.on_button_click(b)).grid(row=row_val, column=col_val, padx=5, pady=5)
-            col_val += 1
-            if col_val > 3:
-                col_val = 0
-                row_val += 1
+        # Calculate prime numbers on startup
+        self.calculate_nearest_prime(256)  # You can replace 256 with your desired initial value
 
     def create_rng_tab(self, tab):
         # Entry for min value
@@ -232,11 +207,7 @@ class CalculatorApp:
 
     def calculate_nearest_prime(self, number):
         try:
-            if number == "":
-                return  # Return if the input field is empty
-
-            num = int(number)
-            if num < 2:
+            if number < 2:
                 return  # Return if the input number is less than 2
 
             def generate_prime_list(center, count, direction):
@@ -248,7 +219,7 @@ class CalculatorApp:
                         primes.append(current)
                 return primes
 
-            nearest_prime = self.find_nearest_prime(num)
+            nearest_prime = self.find_nearest_prime(number)
             lower_primes = generate_prime_list(nearest_prime, 4, -1)
             higher_primes = generate_prime_list(nearest_prime, 4, 1)
 
@@ -268,7 +239,7 @@ class CalculatorApp:
 
 def main():
     root = tk.Tk()
-    app = CalculatorApp(root)
+    app = SOMBFAN(root)
     root.mainloop()
 
 if __name__ == "__main__":
